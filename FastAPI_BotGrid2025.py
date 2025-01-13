@@ -133,4 +133,4 @@ async def main():
 # Run the Uvicorn server
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("FastAPI_BotGrid2025V4:app",host="0.0.0.0",  port=45441, reload=1)
+    uvicorn.run("FastAPI_BotGrid2025:app",host="0.0.0.0",  port=45441, reload=1)

@@ -98,6 +98,80 @@ def key():
         side_ = side_.lower()
         print(side_)
         
+@r_ConfigBot.post("/ConfigBot/getBalance")
+def getBalance():
+       
+        # Fetch account balances
+        balance_info = client.get_account()
+
+        # Extract balances and filter them
+        balances = balance_info['balances']
+        filtered_balances = []
+
+        for asset in balances:
+
+                asset_name = asset['asset']
+                
+                free_balance = float(asset['free'])  # Amount available
+                if asset_name == 'XRP':
+                    print("asset_name",asset_name,free_balance)
+                if asset_name == 'USDT':
+                    print("asset_name",asset_name,free_balance)   
+                if free_balance > 0:
+
+                    # Get the value in USDT for each coin
+                    if asset_name != "USDT":
+                        try:
+                            # Fetch the current price of the asset in USDT
+                            price = float(client.get_symbol_ticker(symbol=f"{asset_name}USDT")['price'])
+                            value_in_usdt = free_balance * price
+                        except:
+                            value_in_usdt = 0  # Skip if no USDT trading pair
+                    else:
+                        value_in_usdt = free_balance  # USDT itself
+
+                    # Filter assets with value greater than $10
+                    if value_in_usdt > 0.01:
+                        filtered_balances.append({
+                            "asset": asset_name,
+                            "free_balance": free_balance,
+                            "value_in_usdt": round(value_in_usdt, 2)
+                        })
+        #resp = []
+        #sum_balance = 0
+        #sorted_balances = sorted(filtered_balances, key=lambda x: x['value_in_usdt'], reverse=True)
+        #for entry in filtered_balances:
+        #    sum_balance +=entry['value_in_usdt']
+        #    print(f"Asset: {entry['asset']}, Free Balance: {entry['free_balance']}, Value in USDT: {entry['value_in_usdt']}")
+        #    resp.append(f"Asset: {entry['asset']}, Free Balance: {entry['free_balance']}, Value in USDT: {entry['value_in_usdt']}")
+        #resp.append(f"Sum balance: {(sum_balance):.2f} : THB x35 ={(sum_balance*35):.2f} ")
+        #return resp
+        resp = []
+        sum_balance = 0
+
+        # Add item price and sort by 'value_in_usdt' in descending order
+        for entry in filtered_balances:
+            entry['item_price'] = entry['value_in_usdt'] * 35  # Example of item price calculation
+
+        # Sort filtered_balances by 'value_in_usdt' in descending order
+        sorted_balances = sorted(filtered_balances, key=lambda x: x['value_in_usdt'], reverse=True)
+
+        for entry in sorted_balances:
+            sum_balance += entry['value_in_usdt']
+            print(
+                f"Asset: {entry['asset']}, Free Balance: {entry['free_balance']}, "
+                f"Value in USDT: {entry['value_in_usdt']}, Item Price: {entry['item_price']:.2f}"
+            )
+            resp.append(
+                f"Asset: {entry['asset']}, Free Balance: {entry['free_balance']}, "
+                f"Value in USDT: {entry['value_in_usdt']}, Item Price: {entry['item_price']:.2f}"
+            )
+
+        # Add total balance and its equivalent in THB
+        resp.append(f"Sum balance: {sum_balance:.2f} USDT : THB x35 = {sum_balance * 35:.2f}")
+        return resp
+    
+    
 @r_ConfigBot.post("/gethistory")
 def getHistory(req:reqGetHistory):
     # List to hold historical orders
