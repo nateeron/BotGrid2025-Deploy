@@ -115,7 +115,7 @@ def start_websocket():
 async def start_fastapi():
     import uvicorn
     #uvicorn.run("FastAPI_BotGrid2025:app", host="127.0.0.1", port=45441, reload=1)
-    config = uvicorn.Config("FastAPI_BotGrid2025V4:app", host="127.0.0.1", port=45441, reload=1)
+    config = uvicorn.Config("FastAPI_BotGrid2025:app", host="127.0.0.1", port=45441, reload=1)
     server = uvicorn.Server(config)
     await server.serve()
 # async def main():

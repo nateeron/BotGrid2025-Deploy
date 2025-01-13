@@ -30,6 +30,7 @@ class Config:
         DB_Name = settings["Connetion"]["DATA_NAME"]
         client = MongoClient(f"mongodb://{host}:{port}")
         db = client[DB_Name]
+        print("Connet",f"mongodb://{host}:{port}")
         return db
     
 # try:

@@ -308,6 +308,7 @@ def LoadPrice(req:req_getprice):
         where_Oj = {"timestamp":{ "$gte": timestamp_min , "$lte": timestamp_max}}
     if timestamp_max == 0 and timestamp_min == 0:
         notWhere = True
+    print(db)
     resp = list(db[table_collection].find(where_Oj).sort("timestamp", -1))
     langthData = len(resp)
     print(langthData)
