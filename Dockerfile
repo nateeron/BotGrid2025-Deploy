@@ -4,7 +4,7 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Copy and install dependencies first (optimize layer caching)
+# Copy and install dependencies first (optimize layer caching)sd
 COPY requirements.txt ./
 RUN pip install --no-cache-dir --default-timeout=600 -r requirements.txt
 
