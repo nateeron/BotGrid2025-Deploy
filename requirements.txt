@@ -1,4 +1,4 @@
-fastapi[all]
+fastapi[standard]
 uvicorn[standard]
 
 binance==0.3
