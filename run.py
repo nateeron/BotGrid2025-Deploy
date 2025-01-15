@@ -7,7 +7,7 @@ def docker_menu():
     default_image_name = "bot-run-test-v1"
     default_container_name = "bot-run-test-v1-container"
     port = "80:45441"
-    #dfdsasdasdasdasd
+    #dfdsaasd
     while True:
         print("\nDocker Management Menu")
         print("0. Auto ReBuild")
