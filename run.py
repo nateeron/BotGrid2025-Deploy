@@ -133,12 +133,41 @@ def Install_Docker():
     os.system("sudo apt update")
     os.system("sudo apt install apt-transport-https ca-certificates curl software-properties-common -y")
     os.system("curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -")
-    os.system("sudo add-apt-repository 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable'")
+    os.system('sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"')
     os.system("sudo apt update")
     
     os.system("sudo apt install docker-ce -y")
     os.system("docker --version")
+def Install_Docker_():
+    try:
+        # Update package list
+        subprocess.run(["sudo", "apt", "update"], check=True)
+        
+        # Install required dependencies
+        subprocess.run(["sudo", "apt", "install", "apt-transport-https", "ca-certificates", "curl", "software-properties-common", "-y"], check=True)
+        
+        # Add Docker’s official GPG key
+        subprocess.run(["curl", "-fsSL", "https://download.docker.com/linux/ubuntu/gpg", "|", "sudo", "apt-key", "add", "-"], check=True)
+        
+        # Add Docker repository
+        subprocess.run(["sudo", "add-apt-repository", "'deb", "[arch=amd64]", "https://download.docker.com/linux/ubuntu", "$(lsb_release", "-cs)", "stable'"], check=True)
+        
+        # Update package list again
+        subprocess.run(["sudo", "apt", "update"], check=True)
+        
+        # Install Docker
+        subprocess.run(["sudo", "apt", "install", "docker-ce", "-y"], check=True)
+        
+        # Verify Docker installation
+        subprocess.run(["docker", "--version"], check=True)
+        
+        print("Docker installed successfully")
     
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred: {e}")
+        return False
+    
+    return True
 def Install_Python():
     os.system("sudo apt update")
     os.system("sudo apt install python3 python3-pip -y")
