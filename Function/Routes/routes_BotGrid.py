@@ -32,7 +32,7 @@ websocket_task = None
     
 @r_botgrid.get("/botgrid/run")
 def run():
-    return {"message": "OK RUNNING Botgrid"}
+    return {"message": "OK RUNNING Botgrid 0.0.1"}
 
 
 @r_botgrid.post("/botgrid/start")
