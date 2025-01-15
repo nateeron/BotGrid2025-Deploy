@@ -9,7 +9,7 @@ def docker_menu():
     port = "80:45441"
     #ssssasdasd 111
     while True:
-        print("\nDocker Management Menu V.0.0.1")
+        print("\nDocker Management Menu V.0.0.2")
         print("0. Auto ReBuild")
         print("1. Build Docker Image")
         print("2. List Docker Images")
