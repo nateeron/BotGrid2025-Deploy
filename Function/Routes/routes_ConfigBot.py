@@ -38,10 +38,11 @@ def CheckConfig():
         client = db.client
         host, port = None, None
         connected = ""
+        time.sleep(0.5)
         # If available, extract address details
         if client.address:
             host, port = client.address
-        if host == None and port == None:
+        elif host == None and port == None:
             settings = Config.getSetting()  # Call the getSetting method
             host = settings["Connetion"]["DATA_HOST"] 
             port = settings["Connetion"]["DATA_PORT"] 
