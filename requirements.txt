@@ -18,6 +18,5 @@ Werkzeug==3.0.4
 pymongo==4.4.1
 
 python-binance==1.0.19
-line_notify==0.1.4
 googletrans==4.0.0rc1
 cryptocode==0.1
