@@ -1,11 +1,11 @@
+ccxt
+binance==0.3
 fastapi[all]
 uvicorn[standard]
 gunicorn
 flask
 requests
 threaded
-binance==0.3
-ccxt==3.1.5
 bcrypt==4.0.1
 watchdog==3.0.0
 watchfiles==0.20.0
