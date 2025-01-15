@@ -6,10 +6,10 @@ WORKDIR /app
 
 # Copy the current directory contents into the container at /app
 COPY . .
-RUN pip install --upgrade pip --upgrade pip==24.3.1
+RUN python -m pip install --upgrade pip -i https://pypi.org/simple
 # RUN pip install --upgrade pip 
 # Install any needed dependencies
-RUN pip install -r requirements.txt
+RUN pip install -i https://pypi.org/simple -r requirements.txt
 
 # Make port 8000 available to the world outside this container
 EXPOSE 45441
