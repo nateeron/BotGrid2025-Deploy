@@ -1,6 +1,6 @@
 fastapi[all]
 uvicorn[standard]
-ccxt==3.1.5
+
 binance==0.3
 gunicorn
 flask
