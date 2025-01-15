@@ -1,9 +1,9 @@
-fastapi[standard]
+fastapi==0.115.6
 uvicorn[standard]
 
 binance==0.3
 gunicorn
-flask
+
 requests
 threaded
 
