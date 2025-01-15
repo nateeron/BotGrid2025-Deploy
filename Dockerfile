@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copy the current directory contents into the container at /app
 COPY . .
-RUN python -m pip install --upgrade pip -i https://pypi.org/simple
+#RUN python -m pip install --upgrade pip -i https://pypi.org/simple
 # RUN pip install --upgrade pip 
 # Install any needed dependencies
 RUN pip install -i https://pypi.org/simple -r requirements.txt
