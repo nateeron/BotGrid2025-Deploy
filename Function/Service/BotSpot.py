@@ -1,7 +1,7 @@
 
 from logging import exception
 import time
-import ccxt
+# import ccxt
 import json
 from line_notify import LineNotify
 
