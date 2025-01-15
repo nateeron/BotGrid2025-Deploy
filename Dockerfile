@@ -8,11 +8,10 @@ WORKDIR /app
 COPY . .
 
 # Install any needed dependencies
-RUN pip install -r requirements.txt
+RUN pip install --timeout=120 -r requirements.txt
 
 # Make port 8000 available to the world outside this container
 EXPOSE 45441
 
 # Run uvicorn to serve the FastAPI app
 CMD ["uvicorn", "FastAPI_BotGrid2025:app", "--host", "0.0.0.0", "--port", "45441"]
-
