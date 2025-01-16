@@ -15,6 +15,9 @@ import json
 from threading import Thread
 
 from websocket import WebSocketApp
+import socketio
+sio = socketio.AsyncServer(async_mode="asgi")
+
 # Initialize the FastAPI app
 app = FastAPI()
 
@@ -70,7 +73,14 @@ async def get_events() -> StreamingResponse:
             yield f"data: {message}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+@sio.event
+async def connect(sid, environ):
+    print(f"Client connected: {sid}")
 
+
+@sio.event
+async def disconnect(sid):
+    print(f"Client disconnected: {sid}")
 def start_websocket():
     def on_error(ws, error):
         print('error')
@@ -132,6 +142,5 @@ async def main():
     await fastapi_task
 # Run the Uvicorn server
 if __name__ == "__main__":
-    #asyncio.run(main())
     import uvicorn
-    uvicorn.run("FastAPI_BotGrid2025:app",host="0.0.0.0",  port=45441, reload=1)
+    uvicorn.run("FastAPI_BotGrid2025:app",host="127.0.0.1",  port=45441, reload=1)

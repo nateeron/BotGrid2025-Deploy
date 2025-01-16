@@ -111,9 +111,10 @@ class OrderManager:
                 self.befo_price.append(price)
 
 
-            amount = 25
-            percenS = 1.5
-            percenB = 0.8
+            st = Config.getSetting()
+            amount = float(st["ORDER_VAL"])
+            percenB = float(st["PERCEN_BUY"])
+            percenS = float(st["PERCEN_SELL"])
 
             qty ="{:.4f}".format(float(amount/price) )
             P_Sell = price + ((price / 100) * percenS) 
