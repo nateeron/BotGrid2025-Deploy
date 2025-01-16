@@ -1,15 +1,13 @@
-
 from logging import exception
 import time
-# import ccxt
+import ccxt
 import json
 
-from googletrans import Translator
 import pprint as pprint
 
 from binance.client import Client
 import cryptocode
-translator = Translator()
+
 
 def price_sl(entry, price):
     '''

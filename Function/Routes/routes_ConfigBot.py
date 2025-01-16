@@ -4,7 +4,7 @@ from flask import Flask, request
 from Function.Service.crud import create_tables
 #from Function.Service.sv_infoPrice import create_tables
 from Function.MongoDatabase import ConnetBinace,Config
-
+import ccxt
 from pprint import pprint
 from binance.client import Client
 from datetime import datetime, timedelta
@@ -18,7 +18,7 @@ r_ConfigBot = APIRouter()
 
 API_KEY_C = ConnetBinace['API_KEY']
 API_SECRET = 'gVptG2cBQy0jyieXU0G8c3iucaj2JzFQthcPQYvNdnSwUZFQKK56WfKhwA08Gjs4'# ConnetBinace['API_SECRET']
-
+_client = Client(API_KEY_C, API_SECRET)
 
 
 @r_ConfigBot.get("/ConfigBot/run")
@@ -60,74 +60,6 @@ def CheckConfig():
     except Exception as e:
         return {"status": "error", "message": str(e)}
     
-    
-
-#@r_ConfigBot.post("/ConfigBot/key")
-#def key():
-#        print(ConnetBinace["API_KEY"])
-#        amount_in = '@20'
-#        side_ = "Buy"
-#        amount_in = float(amount_in[1:])
-#        connect_Binance = None
-#        try:
-#                connect_Binance = Client(API_KEY_C, API_SECRET)
-#                
-#                connect_Binance.load_time_difference()
-#        
-#        except:
-#                text_error = '! error connect_Binace : "apiKey" '
-#                return {"message": "OK RUNNING key"}
-#        symbol_in = 'XRP/USDT'
-#        symbol_ = None
-#        try:
-#                symbol_ = connect_Binance.fetch_ticker(symbol_in)['symbol']  # FTMUSDT FTM/USDT
-#                print(symbol_)
-#        except Exception as e:
-#                text_error = '! error format : "symbol[2]" : ' + \
-#                symbol_in + '| ' + str(e)
-#                return {"message": str(e)}
-#        
-#        unit = symbol_.split("/")
-#        Coind_last_Price = connect_Binance.fetch_ticker(
-#        symbol_in)['last']  # ราคาเหรียญล่าสุด
-#        print(Coind_last_Price)
-#        quantity_coind = 0.0
-#    
-#        amount_in = float(amount_in)
-#    
-#        coin_main_last = 0.0
-#
-#        if unit[1] != 'USDT':
-#                coin_main_last = connect_Binance.fetch_ticker(
-#                unit[1]+'USDT')['last']
-#                print(coin_main_last)
-#                
-#        else:
-#                pass
-#        Coind_balance_main = ""
-#        Coind_balance_Secondary = ""
-#        try:
-#            # จำนวน Coind กลัก BTCUSDT =  (USDT)  : FTMBNB = (BNB) ที่ถือ
-#                Coind_balance_main = connect_Binance.fetch_total_balance()[unit[1]]
-#                print(Coind_balance_main)
-#                
-#        # จำนวน Coind รอง BTCUSDT =  (BTC) : FTMBNB = (FTM)  ที่ถือ
-#        except Exception as e:
-#            pass
-#        
-#        try:
-#                Coind_balance_Secondary = connect_Binance.fetch_total_balance()[unit[0]]
-#                print(Coind_balance_Secondary)
-#        #Coind_balance_main = 424.20536
-#        # ซื้อ n% ของเงินที่มี
-#
-#        except Exception as e:
-#            pass
-#       # trades = connect_Binance.fetch_order_trades(symbol=symbol_in)
-#        s = connect_Binance.fetch_balance()
-#        print(s)
-#        side_ = side_.lower()
-#        print(side_)
 @r_ConfigBot.post("/ConfigBot/key")
 def key():
     print("API Key: ", API_KEY_C)
@@ -138,8 +70,7 @@ def key():
     connect_Binance = None
     try:
         # Initialize Binance Client
-        connect_Binance = Client(API_KEY_C, API_SECRET)
-        connect_Binance.get_server_time()  # To test if the connection is working
+        _client.get_server_time()  # To test if the connection is working
     except Exception as e:
         text_error = f"! Error connecting to Binance: {str(e)}"
         return {"message": text_error}
@@ -147,7 +78,7 @@ def key():
     symbol_in = 'XRPUSDT'
     symbol_ = None
     try:
-        symbol_ = connect_Binance.get_symbol_ticker(symbol=symbol_in)['symbol']
+        symbol_ = _client.get_symbol_ticker(symbol=symbol_in)['symbol']
         print(symbol_)
     except Exception as e:
         text_error = f"! Error fetching ticker: {symbol_in} | {str(e)}"
@@ -155,7 +86,7 @@ def key():
 
     # Split symbol (e.g., 'XRPUSDT' -> ['XRP', 'USDT'])
     unit = symbol_in.split("USDT")  # Adjust based on the symbol format
-    Coin_last_Price = connect_Binance.get_symbol_ticker(symbol=symbol_in)['price']
+    Coin_last_Price = _client.get_symbol_ticker(symbol=symbol_in)['price']
     print(Coin_last_Price)
     
     # Handle amount
@@ -165,13 +96,13 @@ def key():
     Coind_balance_main = ""
     Coind_balance_Secondary = ""
     try:
-        Coind_balance_main = connect_Binance.get_asset_balance(asset=unit[1])
+        Coind_balance_main = _client.get_asset_balance(asset=unit[1])
         print("Main Coin Balance: ", Coind_balance_main)
     except Exception as e:
         pass
 
     try:
-        Coind_balance_Secondary = connect_Binance.get_asset_balance(asset=unit[0])
+        Coind_balance_Secondary = _client.get_asset_balance(asset=unit[0])
         print("Secondary Coin Balance: ", Coind_balance_Secondary)
     except Exception as e:
         pass
@@ -180,12 +111,12 @@ def key():
     side_ = side_.lower()  # "buy" or "sell"
     print(f"Order side: {side_}")
     if side_ == "buy":
-        order = connect_Binance.order_market_buy(
+        order = _client.order_market_buy(
             symbol=symbol_in,
             quantity=amount_in
         )
     else:
-        order = connect_Binance.order_market_sell(
+        order = _client.order_market_sell(
             symbol=symbol_in,
             quantity=amount_in
         )
@@ -193,89 +124,14 @@ def key():
     print(order)  # Print the order response for confirmation
 
     return {"message": "OK RUNNING key"}
-#@r_ConfigBot.post("/ConfigBot/getBalance")
-#def getBalance():
-#       
-#        # Fetch account balances
-#        balance_info = client.get_account()
-#
-#        # Extract balances and filter them
-#        balances = balance_info['balances']
-#        filtered_balances = []
-#
-#        for asset in balances:
-#
-#                asset_name = asset['asset']
-#                
-#                free_balance = float(asset['free'])  # Amount available
-#                if asset_name == 'XRP':
-#                    print("asset_name",asset_name,free_balance)
-#                if asset_name == 'USDT':
-#                    print("asset_name",asset_name,free_balance)   
-#                if free_balance > 0:
-#
-#                    # Get the value in USDT for each coin
-#                    if asset_name != "USDT":
-#                        try:
-#                            # Fetch the current price of the asset in USDT
-#                            price = float(client.get_symbol_ticker(symbol=f"{asset_name}USDT")['price'])
-#                            value_in_usdt = free_balance * price
-#                        except:
-#                            value_in_usdt = 0  # Skip if no USDT trading pair
-#                    else:
-#                        value_in_usdt = free_balance  # USDT itself
-#
-#                    # Filter assets with value greater than $10
-#                    if value_in_usdt > 0.01:
-#                        filtered_balances.append({
-#                            "asset": asset_name,
-#                            "free_balance": free_balance,
-#                            "value_in_usdt": round(value_in_usdt, 2)
-#                        })
-#        #resp = []
-#        #sum_balance = 0
-#        #sorted_balances = sorted(filtered_balances, key=lambda x: x['value_in_usdt'], reverse=True)
-#        #for entry in filtered_balances:
-#        #    sum_balance +=entry['value_in_usdt']
-#        #    print(f"Asset: {entry['asset']}, Free Balance: {entry['free_balance']}, Value in USDT: {entry['value_in_usdt']}")
-#        #    resp.append(f"Asset: {entry['asset']}, Free Balance: {entry['free_balance']}, Value in USDT: {entry['value_in_usdt']}")
-#        #resp.append(f"Sum balance: {(sum_balance):.2f} : THB x35 ={(sum_balance*35):.2f} ")
-#        #return resp
-#        resp = []
-#        sum_balance = 0
-#
-#        # Add item price and sort by 'value_in_usdt' in descending order
-#        for entry in filtered_balances:
-#            entry['item_price'] = entry['value_in_usdt'] * 35  # Example of item price calculation
-#
-#        # Sort filtered_balances by 'value_in_usdt' in descending order
-#        sorted_balances = sorted(filtered_balances, key=lambda x: x['value_in_usdt'], reverse=True)
-#
-#        for entry in sorted_balances:
-#            sum_balance += entry['value_in_usdt']
-#            print(
-#                f"Asset: {entry['asset']}, Free Balance: {entry['free_balance']}, "
-#                f"Value in USDT: {entry['value_in_usdt']}, Item Price: {entry['item_price']:.2f}"
-#            )
-#            resp.append(
-#                f"Asset: {entry['asset']}, Free Balance: {entry['free_balance']}, "
-#                f"Value in USDT: {entry['value_in_usdt']}, Item Price: {entry['item_price']:.2f}"
-#            )
-#
-#        # Add total balance and its equivalent in THB
-#        resp.append(f"Sum balance: {sum_balance:.2f} USDT : THB x35 = {sum_balance * 35:.2f}")
-#        return resp
-    
-from binance.client import Client
-_client = Client(API_KEY_C, API_SECRET)
-@r_ConfigBot.post("/ConfigBot/getBalance")
-def getBalance():
+
+@r_ConfigBot.post("/ConfigBot/getBalanceJson")
+def getBalanceJson():
     # Initialize the Binance client (make sure you have set your API key and secret)
-    client = Client(API_KEY_C, API_SECRET)
     
     try:
         # Fetch account balances
-        balance_info = client.get_account()
+        balance_info = _client.get_account()
     except Exception as e:
         return {"message": f"Error fetching balance: {str(e)}"}
 
@@ -295,7 +151,7 @@ def getBalance():
             if asset_name != "USDT":
                 try:
                     # Fetch the current price of the asset in USDT
-                    price = float(client.get_symbol_ticker(symbol=f"{asset_name}USDT")['price'])
+                    price = float(_client.get_symbol_ticker(symbol=f"{asset_name}USDT")['price'])
                     value_in_usdt = free_balance * price
                 except Exception as e:
                     value_in_usdt = 0  # Skip if no USDT trading pair
@@ -338,71 +194,81 @@ def getBalance():
 
     return resp
 
-# @r_ConfigBot.post("/gethistory")
-# def getHistory(req:reqGetHistory):
-#     # List to hold historical orders
-#     order_history = []
-#     print(req)
-#     try:
-#         # Fetch all trading symbols from the account
-#         #exchange_info = client.get_exchange_info()
-#         #symbols = [symbol['symbol'] for symbol in exchange_info['symbols']]
-#         #symbols = ['XRPUSDT','BNBUSDT']
-#         # Loop through all symbols to get their order history
-#         err = ""
-#         for symbol in req.symbols:
-#             try:
-#                 # Fetch all orders for the symbol
-#                 orders = client.get_all_orders(symbol=symbol,limit=req.limit)
-#                 # Filter completed buy/sell orders
-#                 i = 0
-#                 for order in orders:
-#                     if i <= 3 :
-#                         i +=1
-#                     if order['status'] == 'FILLED' and order['side'] in ['BUY', 'SELL']:
-#                         executed_qty = float(order['executedQty'])
-#                         quote_qty = float(order['cummulativeQuoteQty'])
-#                         if symbol == 'XRPUSDT':
-#                             price = (
-#                                 f'{(quote_qty / executed_qty):.4f}'
-#                                 if executed_qty > 0 else "0.0000"
-#                             )
-#                         else:
-#                             price = (
-#                                 f'{(quote_qty / executed_qty):.2f}'
-#                                 if executed_qty > 0 else "0.00"
-#                             )   
-#                         order_info = {
-#                             "symbol": symbol,
-#                             "order_id": order['orderId'],
-#                             "side": order['side'],  # BUY or SELL
-#                             "price":price,
-#                             "executed_qty": float(order['executedQty']),
-#                             "quote_qty": float(order['cummulativeQuoteQty']),
-#                             "time": cvt.ts_int13_to_datetime_bangkok(int(order['updateTime']) )
-#                         }
-#                         order_history.append(order_info)
-#             except Exception as e:
-#                 print(f"Error fetching orders for {symbol}: {e}")
-#                 err = f"Error fetching orders for {symbol}: {e}"
-#         # Sort orders by time (optional)
-#         order_history.sort(key=lambda x: x['time'], reverse=True)
-#         # Prepare a response summary
-#         resp = []
-#         for order in order_history:
-#             resp.append(f"Symbol: {order['symbol']}, Side: {order['side']}, "
-#                         f"Price: {order['price']}, Executed Quantity: {order['executed_qty']}, "
-#                         f"Quote Quantity: {order['quote_qty']}, Time: {order['time']}")
-#         return resp if resp else [f"No order history found. {err}"]
-#     
-#     except Exception as e:
-#         return {"error": str(e)}
-#     
+@r_ConfigBot.post("/ConfigBot/getBalance")
+def getBalance():
+       
+        # Fetch account balances
+        balance_info = _client.get_account()
 
-# Helper function to convert balances to USDT
+        # Extract balances and filter them
+        balances = balance_info['balances']
+        filtered_balances = []
 
-@r_ConfigBot.post("/gethistory")
-def getHistory(req:reqGetHistory):
+        for asset in balances:
+
+                asset_name = asset['asset']
+                
+                free_balance = float(asset['free'])  # Amount available
+                if asset_name == 'XRP':
+                    print("asset_name",asset_name,free_balance)
+                if asset_name == 'USDT':
+                    print("asset_name",asset_name,free_balance)   
+                if free_balance > 0:
+
+                    # Get the value in USDT for each coin
+                    if asset_name != "USDT":
+                        try:
+                            # Fetch the current price of the asset in USDT
+                            price = float(_client.get_symbol_ticker(symbol=f"{asset_name}USDT")['price'])
+                            value_in_usdt = free_balance * price
+                        except:
+                            value_in_usdt = 0  # Skip if no USDT trading pair
+                    else:
+                        value_in_usdt = free_balance  # USDT itself
+
+                    # Filter assets with value greater than $10
+                    if value_in_usdt > 0.01:
+                        filtered_balances.append({
+                            "asset": asset_name,
+                            "free_balance": free_balance,
+                            "value_in_usdt": round(value_in_usdt, 2)
+                        })
+        #resp = []
+        #sum_balance = 0
+        #sorted_balances = sorted(filtered_balances, key=lambda x: x['value_in_usdt'], reverse=True)
+        #for entry in filtered_balances:
+        #    sum_balance +=entry['value_in_usdt']
+        #    print(f"Asset: {entry['asset']}, Free Balance: {entry['free_balance']}, Value in USDT: {entry['value_in_usdt']}")
+        #    resp.append(f"Asset: {entry['asset']}, Free Balance: {entry['free_balance']}, Value in USDT: {entry['value_in_usdt']}")
+        #resp.append(f"Sum balance: {(sum_balance):.2f} : THB x35 ={(sum_balance*35):.2f} ")
+        #return resp
+        resp = []
+        sum_balance = 0
+
+        # Add item price and sort by 'value_in_usdt' in descending order
+        for entry in filtered_balances:
+            entry['item_price'] = entry['value_in_usdt'] * 35  # Example of item price calculation
+
+        # Sort filtered_balances by 'value_in_usdt' in descending order
+        sorted_balances = sorted(filtered_balances, key=lambda x: x['value_in_usdt'], reverse=True)
+
+        for entry in sorted_balances:
+            sum_balance += entry['value_in_usdt']
+            print(
+                f"Asset: {entry['asset']}, Free Balance: {entry['free_balance']}, "
+                f"Value in USDT: {entry['value_in_usdt']}, Item Price: {entry['item_price']:.2f}"
+            )
+            resp.append(
+                f"Asset: {entry['asset']}, Free Balance: {entry['free_balance']}, "
+                f"Value in USDT: {entry['value_in_usdt']}, Item Price: {entry['item_price']:.2f}"
+            )
+
+        # Add total balance and its equivalent in THB
+        resp.append(f"Sum balance: {sum_balance:.2f} USDT : THB x35 = {sum_balance * 35:.2f}")
+        return resp
+    
+@r_ConfigBot.post("/ConfigBot/gethistoryJson")
+def gethistoryJson(req:reqGetHistory):
     # List to hold historical orders
     order_history = []
     err = ""
@@ -463,49 +329,91 @@ def getHistory(req:reqGetHistory):
         return resp
     except Exception as e:
         return {"error": str(e)}
-
-# @r_ConfigBot.post("/getSumary")
-# def report_Sumary():
-#         now = datetime.utcnow()
-#         end_time = now
-#         start_time = end_time - timedelta(days=30)
-#         start_time_ms = int(start_time.timestamp() * 1000)
-#         end_time_ms = int(end_time.timestamp() * 1000)
-#         snapshots = client.get_account_snapshot(type='SPOT' ,startTime=start_time_ms,endTime=end_time_ms)#['snapshotVos']
-#         print(len(snapshots['snapshotVos']))
-#         print(snapshots['snapshotVos'])
-        
-#         return snapshots
-@r_ConfigBot.post("/getSumary")
-def report_Sumary():
+    
+@r_ConfigBot.post("/ConfigBot/gethistory")
+def getHistory(req:reqGetHistory):
+    # List to hold historical orders
+    order_history = []
+    print(req)
     try:
-        # Get the current UTC time and calculate the time range (last 30 days)
+        # Fetch all trading symbols from the account
+        #exchange_info = client.get_exchange_info()
+        #symbols = [symbol['symbol'] for symbol in exchange_info['symbols']]
+        #symbols = ['XRPUSDT','BNBUSDT']
+        # Loop through all symbols to get their order history
+        err = ""
+        for symbol in req.symbols:
+            try:
+                # Fetch all orders for the symbol
+                orders = _client.get_all_orders(symbol=symbol,limit=req.limit)
+                # Filter completed buy/sell orders
+                i = 0
+                for order in orders:
+                    if i <= 3 :
+                        i +=1
+                    if order['status'] == 'FILLED' and order['side'] in ['BUY', 'SELL']:
+                        executed_qty = float(order['executedQty'])
+                        quote_qty = float(order['cummulativeQuoteQty'])
+                        if symbol == 'XRPUSDT':
+                            price = (
+                                f'{(quote_qty / executed_qty):.4f}'
+                                if executed_qty > 0 else "0.0000"
+                            )
+                        else:
+                            price = (
+                                f'{(quote_qty / executed_qty):.2f}'
+                                if executed_qty > 0 else "0.00"
+                            )   
+                        order_info = {
+                            "symbol": symbol,
+                            "order_id": order['orderId'],
+                            "side": order['side'],  # BUY or SELL
+                            "price":price,
+                            "executed_qty": float(order['executedQty']),
+                            "quote_qty": float(order['cummulativeQuoteQty']),
+                            "time": cvt.ts_int13_to_datetime_bangkok(int(order['updateTime']) )
+                        }
+                        order_history.append(order_info)
+            except Exception as e:
+                print(f"Error fetching orders for {symbol}: {e}")
+                err = f"Error fetching orders for {symbol}: {e}"
+        # Sort orders by time (optional)
+        order_history.sort(key=lambda x: x['time'], reverse=True)
+        # Prepare a response summary
+        resp = []
+        for order in order_history:
+            resp.append(f"Symbol: {order['symbol']}, Side: {order['side']}, "
+                        f"Price: {order['price']}, Executed Quantity: {order['executed_qty']}, "
+                        f"Quote Quantity: {order['quote_qty']}, Time: {order['time']}")
+        return resp if resp else [f"No order history found. {err}"]
+    
+    except Exception as e:
+        return {"error": str(e)}
+    
+
+# Helper function to convert balances to USDT
+def get_balance_in_usdt(asset_name, free_balance):
+        
+    if asset_name == "USDT":
+        return free_balance  # USDT itself
+    try:
+        price_in_usdt = float(_client.get_symbol_ticker(symbol=f"{asset_name}USDT")['price'])
+        return free_balance * price_in_usdt
+    except:
+        return 0  # If no USDT pair exists
+
+@r_ConfigBot.post("/ConfigBot/getSumary")
+def report_Sumary():
         now = datetime.utcnow()
         end_time = now
         start_time = end_time - timedelta(days=30)
         start_time_ms = int(start_time.timestamp() * 1000)
         end_time_ms = int(end_time.timestamp() * 1000)
-
-        # Fetch account snapshot for the last 30 days (SPOT type)
-        snapshots = _client.get_account_snapshot(type='SPOT', startTime=start_time_ms, endTime=end_time_ms)
+        snapshots = _client.get_account_snapshot(type='SPOT' ,startTime=start_time_ms,endTime=end_time_ms)#['snapshotVos']
+        print(len(snapshots['snapshotVos']))
+        print(snapshots['snapshotVos'])
         
-        # Log the number of snapshots and the raw response for debugging
-        #logging.info(f"Number of snapshots fetched: {len(snapshots.get('snapshotVos', []))}")
-        #logging.debug(f"Snapshots: {snapshots.get('snapshotVos', [])}")
-        
-        # Optionally, process and return a more refined summary
-        if 'snapshotVos' in snapshots:
-            summary = []
-            for snapshot in snapshots['snapshotVos']:
-                # Here, you can refine the summary by processing the snapshot data
-                summary.append(snapshot)
-            return summary
-        
-        return {"error": "No snapshots found."}
-    
-    except Exception as e:
-        #logging.error(f"Error fetching summary: {e}")
-        return {"error": str(e)}
+        return snapshots
 
 @r_ConfigBot.get('/ConfigBot/getSetting')
 def getdata():
@@ -527,135 +435,3 @@ async def update(req: Request):
         js_file.write("var data = " + json.dumps(req_data, indent=4))
     return "Success"
        
-# @r_ConfigBot.post("/gethistory")
-# def getHistory(req:reqGetHistory):
-#     # List to hold historical orders
-#     order_history = []
-#     print(req)
-#     try:
-#         # Fetch all trading symbols from the account
-#         #exchange_info = client.get_exchange_info()
-#         #symbols = [symbol['symbol'] for symbol in exchange_info['symbols']]
-#         #symbols = ['XRPUSDT','BNBUSDT']
-#         # Loop through all symbols to get their order history
-#         
-#         # client_time = client.get_server_time()
-#         # time_offset = client_time['serverTime'] - int(time.time() * 1000)
-#         # client.timestamp_offset = time_offset
-# 
-#         # Fetch orders with adjusted timestamp
-#         print("Local time:", int(time.time() * 1000))
-#         print("Server time:", client.get_server_time()['serverTime'])
-#         print("Time offset:", client.timestamp_offset)
-#         for symbol in req.symbols:
-#             try:
-#                 
-#                 # Fetch all orders for the symbol
-#                 orders = client.get_all_orders(symbol=symbol,limit=req.limit,recvWindow=10000)
-#                 pprint(orders[0])
-#                 pprint('--------------------------------------------------------')
-#                 # Filter completed buy/sell orders
-#                 i = 0
-#                 for order in orders:
-#                     if i <= 3 :
-#                         i +=1
-#                         pprint(order)
-#                         
-#                     if order['status'] == 'FILLED' and order['side'] in ['BUY', 'SELL']:
-#                         executed_qty = float(order['executedQty'])
-#                         quote_qty = float(order['cummulativeQuoteQty'])
-#                         if symbol == 'XRPUSDT':
-#                             price = (
-#                                 f'{(quote_qty / executed_qty):.4f}'
-#                                 if executed_qty > 0 else "0.0000"
-#                             )
-#                         else:
-#                             price = (
-#                                 f'{(quote_qty / executed_qty):.2f}'
-#                                 if executed_qty > 0 else "0.00"
-#                             )   
-#                         order_info = {
-#                             "symbol": symbol,
-#                             "order_id": order['orderId'],
-#                             "side": order['side'],  # BUY or SELL
-#                             "price":price,
-#                             "executed_qty": float(order['executedQty']),
-#                             "quote_qty": float(order['cummulativeQuoteQty']),
-#                             "time": cvt.ts_int13_to_datetime_bangkok(int(order['updateTime']) )
-#                         }
-#                         order_history.append(order_info)
-#             except Exception as e:
-#                 print(f"Error fetching orders for {symbol}: {e}")
-# 
-#         # Sort orders by time (optional)
-#         order_history.sort(key=lambda x: x['time'], reverse=True)
-#         # Prepare a response summary
-#         resp = []
-#         for order in order_history:
-#             resp.append(f"Symbol: {order['symbol']}, Side: {order['side']}, "
-#                         f"Price: {order['price']}, Executed Quantity: {order['executed_qty']}, "
-#                         f"Quote Quantity: {order['quote_qty']}, Time: {order['time']}")
-#         return resp if resp else ["No order history found."]
-#     
-#     except Exception as e:
-#         return {"error": str(e)}
-@r_ConfigBot.post("/gethistory")
-def getHistory(req:reqGetHistory):
-    # List to hold historical orders
-    order_history = []
-    
-    try:
-        # Loop through all symbols to get their order history
-        for symbol in req.symbols:
-            try:
-                # Fetch all orders for the symbol
-                orders = _client.get_all_orders(symbol=symbol, limit=req.limit, recvWindow=10000)
-                
-                # Limit to the first 3 orders (if necessary)
-                i = 0
-                for order in orders:
-                    if i >= 3: 
-                        break  # Stop after 3 orders
-                    
-                    if order['status'] == 'FILLED' and order['side'] in ['BUY', 'SELL']:
-                        executed_qty = float(order['executedQty'])
-                        quote_qty = float(order['cummulativeQuoteQty'])
-                        price = (
-                            f'{(quote_qty / executed_qty):.4f}' if executed_qty > 0 and symbol == 'XRPUSDT' else
-                            f'{(quote_qty / executed_qty):.2f}' if executed_qty > 0 else "0.00"
-                        )
-                        
-                        # Create order info dictionary
-                        order_info = {
-                            "symbol": symbol,
-                            "order_id": order['orderId'],
-                            "side": order['side'],  # BUY or SELL
-                            "price": price,
-                            "executed_qty": executed_qty,
-                            "quote_qty": quote_qty,
-                            "time": cvt.ts_int13_to_datetime_bangkok(int(order['updateTime']))
-                        }
-                        order_history.append(order_info)
-                        i += 1
-
-            except Exception as e:
-                print(f"Error fetching orders for {symbol}: {e}")
-        
-        # Sort orders by time in descending order
-        order_history.sort(key=lambda x: x['time'], reverse=True)
-        
-        # Prepare a structured response
-        if order_history:
-            resp = [{"symbol": order['symbol'],
-                     "side": order['side'],
-                     "price": order['price'],
-                     "executed_qty": order['executed_qty'],
-                     "quote_qty": order['quote_qty'],
-                     "time": order['time']} for order in order_history]
-        else:
-            resp = [{"message": "No order history found."}]
-        
-        return resp
-    
-    except Exception as e:
-        return {"error": str(e)}
