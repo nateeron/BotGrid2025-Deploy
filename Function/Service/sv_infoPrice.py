@@ -80,7 +80,7 @@ def load_date(table):
                     ]
     """
     # Retrieve documents from MongoDB collection
-    resp = list(db[table].find({}, {"timestamp": 1,"Create_Date":1, "close": 1}).sort("timestamp", -1))
+    resp = list(db[table].find({}, {"timestamp": 1,"Create_Date":1, "close": 1}).sort("timestamp", -1).limit(1500000))
     # Map over the response and convert timestamp
     result = []
     result_oj = []
@@ -100,8 +100,10 @@ def load_date(table):
         cs= (s.get('Create_Date'))
         #result_oj.append(str(index)+" "+str(df)+','+str(ss)+','+str(bk)+'|'+str(cs))
         #result_oj.append(index)
-        
-        result_ojson[str(df)+"_"+str(index+1)+"_"+str(count)] = (str(bk)+' ,'+str(ss)+'|'+str(cs))
+        if 1 == 1:
+            result_ojson[str(index+1)] = (str(bk))
+        else:
+            result_ojson[str(df)+"_"+str(index+1)+"_"+str(count)] = (str(bk)+' ,'+str(ss)+'|'+str(cs))
         #result_oj[str(df)+"_"+str(index)] = (str(ss)+','+str(bk)+'|'+str(cs))
         if index == 0:
                 info = {

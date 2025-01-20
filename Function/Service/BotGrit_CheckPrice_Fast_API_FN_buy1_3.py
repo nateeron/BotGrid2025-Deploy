@@ -75,7 +75,7 @@ def check_Day(data,nexDay):
             
       checkday =  GetDateFormTimesteam(data)
       if checkday >= Day_Compare:
-            print(f'>>> {checkday} >= {Day_Compare}')
+            #print(f'>>> {checkday} >= {Day_Compare}')
             Day_Compare = checkday + 24*60*60*1000
             return True
       else:
@@ -137,7 +137,8 @@ class OrderManager:
             #else:
             #    self.befo_price.pop(0)
             #    self.befo_price.append(price)
-
+            if self.count_Buy == 12 :
+                print(f"self.count_Buy: {self.count_Buy}")
 
             st = Config.getSetting()
             amount = float(st["ORDER_VAL"])
@@ -191,7 +192,7 @@ class OrderManager:
                 self.max_Order +=1
                     
             else:
-
+                # ถ้าไม่มีการซื้อขาย มากกว่า 20 Bar ให้ซื้อ
                 if self.Oder_NaverBuy > 20:
                     order = {
                         "Order_id": self.id_counter,
@@ -233,8 +234,8 @@ class OrderManager:
                   print('Error order_last ',e)
                   print(self.data_New)
                
-                self.max_Order =  len(order_last) if self.max_Order < len(order_last)  else self.max_Order
-                if len(order_last) == 0 :
+                #self.max_Order =  len(order_last) if self.max_Order < len(order_last)  else self.max_Order
+                if len(order_last) <= 0 :
                     self.Oder_NaverBuy += 1
                     
                     #self.action_buy(order,table_collection)
@@ -263,9 +264,9 @@ class OrderManager:
                                 order["UpdateDate"] = update_data["UpdateDate"]
                                 
                                 val =  self.Amount - (float(item['Sell_Quantity']) *float(req.price))
-                                
+                                maxOder =  self.max_Order -1
                                 self.Amount = val if val > self.Amount else self.Amount
-                                self.max_Order -= 1
+                                self.max_Order = maxOder if maxOder > self.max_Order else self.max_Order
 
             x = check_Day(req.timestamp,Day_Compare)
             if x:
@@ -288,7 +289,9 @@ class OrderManager:
                 db['Report'].insert_one(oj)
                 self.Amount = 0
                 self.max_Order = 0
+        
         print(f" Count: {count_} DATA ALL : {len(data)}")
+        Day_Compare = 0
         #print(self.max_Order)
         if isinstance(self.data_New, list):
             if len(self.data_New) > 0:

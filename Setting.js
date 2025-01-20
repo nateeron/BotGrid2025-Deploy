@@ -1,7 +1,7 @@
 var data = {
-    "ORDER_VAL": "10",
-    "PERCEN_BUY": "0.5",
-    "PERCEN_SELL": "0.5",
+    "ORDER_VAL": "25",
+    "PERCEN_BUY": "1.3",
+    "PERCEN_SELL": "0.8",
     "SYMBOL": [
         "XRPUSDT",
         "BNBUSDT"
