@@ -1,5 +1,6 @@
 from fastapi import APIRouter,HTTPException,Request
-from Function.Models.model_routes_botGrid import req_bot,infoPrice,check_price,backtest,GetinfoBacktest
+from Function.Models.model_routes_botGrid import (req_bot,infoPrice,check_price,backtest,
+                                                  GetinfoBacktest)
 import Function.Service.sv_botgrid_Backtest1_3 as bt 
 
 
@@ -176,4 +177,10 @@ async def Backtest(req:backtest):
 async def data_Backtest(req:GetinfoBacktest):
     print("data_Backtest")
     resp = bt.data_Backtest(req)
+    return resp
+
+@r_botgrid.get("/botgrid/report")
+async def botgrid_report():
+    print("botgrid_report")
+    resp = bt.get_report()
     return resp

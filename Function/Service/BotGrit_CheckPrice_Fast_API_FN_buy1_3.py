@@ -58,7 +58,28 @@ def Action_Buy(self,req:oj_Order,table_collection):
     #order_dict = req.dict()
     #db[table_collection].insert_one(order_dict)
     
+Day_data = 1736960280000
+Day_Compare = 0
 
+def GetDateFormTimesteam(ts):
+      date_time = datetime.fromtimestamp(ts / 1000)
+      formatted_date = date_time.strftime("%d/%m/%Y 00:00:00")
+      parsed_date = datetime.strptime(formatted_date, "%d/%m/%Y %H:%M:%S")
+      return  int(parsed_date.timestamp() * 1000)
+
+def check_Day(data,nexDay):
+      global Day_Compare
+      if nexDay == 0:
+            Day_Compare = GetDateFormTimesteam(data)+ 24*60*60*1000
+            return False
+            
+      checkday =  GetDateFormTimesteam(data)
+      if checkday >= Day_Compare:
+            print(f'>>> {checkday} >= {Day_Compare}')
+            Day_Compare = checkday + 24*60*60*1000
+            return True
+      else:
+            return False
 
 class OrderManager:
     
@@ -69,10 +90,11 @@ class OrderManager:
         self.count_Buy = 0
         self.id_counter = 0
         self.max_Order = 0
-        
+        self.calcurate_DAY = 0
+        self.Amount = 0
         # Load configuration
-        with open('config.json') as f:
-            self.config = json.load(f)
+        # with open('config.json') as f:
+        #     self.config = json.load(f)
             
             
     def action_buy(self, order):
@@ -82,11 +104,16 @@ class OrderManager:
         
         
     def check_price_buy(self,data):
+        global Day_Compare
+        
         """
         For BackTEST Fast"""
-        
+        count_ = 0
         for ind,x in enumerate(data):
-            
+            count_ += 1
+            if count_ == 27900:
+                print(count_)
+                pass
             if ind % 100000 == 0:
                 print("Count:",ind,"Data Langth:",len(self.data_New))
                 
@@ -96,6 +123,7 @@ class OrderManager:
             req = check_price(
                     symbol='XRPUSDT',
                     price=price,
+                    close=price,
                     tf="1m",
                     timestamp=time_action
             )
@@ -104,11 +132,11 @@ class OrderManager:
             price = float(req.price)
             time_now = convert_timestamp(req.timestamp)
 
-            if len(self.befo_price) < 2:
-                self.befo_price.append(price)
-            else:
-                self.befo_price.pop(0)
-                self.befo_price.append(price)
+            #if len(self.befo_price) < 2:
+            #    self.befo_price.append(price)
+            #else:
+            #    self.befo_price.pop(0)
+            #    self.befo_price.append(price)
 
 
             st = Config.getSetting()
@@ -158,6 +186,10 @@ class OrderManager:
                 self.count_Buy += 1
                 actionB = True
                 self.Oder_NaverBuy =0
+                
+                self.Amount = self.Amount+ (float(qty)*price)
+                self.max_Order +=1
+                    
             else:
 
                 if self.Oder_NaverBuy > 20:
@@ -191,6 +223,10 @@ class OrderManager:
                     self.Oder_NaverBuy =0
                     #order_last = list(db[table_collection].find({"status":0}).limit(3))
                     #print(self.data_New) 
+                    # Save Report Max Mouny
+                    self.Amount = self.Amount+(float(qty)*price)
+                    self.max_Order +=1
+                    
                 try:
                     order_last = [x for x in self.data_New if x.get("status") == 0]
                 except Exception as e:
@@ -225,7 +261,34 @@ class OrderManager:
                                 order["priceSell"] = update_data["priceSell"]
                                 order["Sell_Quantity"] = update_data["Sell_Quantity"]
                                 order["UpdateDate"] = update_data["UpdateDate"]
-                                break
+                                
+                                val =  self.Amount - (float(item['Sell_Quantity']) *float(req.price))
+                                
+                                self.Amount = val if val > self.Amount else self.Amount
+                                self.max_Order -= 1
+
+            x = check_Day(req.timestamp,Day_Compare)
+            if x:
+                oj = { 
+                    "time":req.timestamp,
+                    "Amount": self.Amount,
+                    "order": self.max_Order,
+                }
+                # insert data
+                db['Report'].insert_one(oj)
+                self.Amount = 0
+                self.max_Order = 0
+            elif len(data) == count_:
+                oj = { 
+                    "time":req.timestamp,
+                    "Amount": self.Amount,
+                    "order": self.max_Order,
+                }
+                # insert data
+                db['Report'].insert_one(oj)
+                self.Amount = 0
+                self.max_Order = 0
+        print(f" Count: {count_} DATA ALL : {len(data)}")
         #print(self.max_Order)
         if isinstance(self.data_New, list):
             if len(self.data_New) > 0:

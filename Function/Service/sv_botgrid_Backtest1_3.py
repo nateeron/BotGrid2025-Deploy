@@ -93,3 +93,12 @@ def data_Backtest(req:GetinfoBacktest):
     resp_converted = convert_objectid(datas)
     resps = JSONResponse(content=resp_converted)
     return resps
+
+
+def get_report():
+    table_collections = "Report"
+    #datas = list(db[table_collections].find({"timestem_buy":{"$lte":req.DateFrom}}).sort("timestem_buy",1))    
+    datas = list(db[table_collections].find().sort("timestem_buy",-1))    
+    resp_converted = convert_objectid(datas)
+    resps = JSONResponse(content=resp_converted)
+    return resps
